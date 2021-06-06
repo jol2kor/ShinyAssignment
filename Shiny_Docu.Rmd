@@ -1,0 +1,147 @@
+---
+title: "shinyApp"
+author: "NJL"
+date: "06/06/2021"
+runtime: shiny
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(shiny)
+library(plotly)
+```
+
+## Introduction
+
+This is the **User Document** for the WeatherHistory App in the Shiny server.
+The URL for the app is https://jol2kor.shinyapps.io/WeatherHistory/
+
+## Overview
+
+The App displays the weather conditions that were prevailing in the 3 cities, Bangalore, Mumbai and Chennai during the month of May 2021.
+
+The Max, Min and Average temperature, also included are average Humidity and average Wind Speed can be displayed in the graph using appropriate selections.
+
+### Date Range Selection
+The user can select the date range using the slider, the default is the complete month of May.
+
+
+```{r echo = FALSE}
+            sliderInput(inputId = "date", label = "Date Range",
+                        min = 1, max = 31,
+                        value = c(1, 31))
+```
+
+
+### Choice of weather parameter
+
+The selection of the weather parameter for viewing as a plot for the selected day range is through a radio button input. At any time only one parameter can be visualised.
+
+The y axis label is also updated accordingly.
+
+The default setting is Average Temperature.
+
+However, when hovering over the data points on the plot, all the parameters for that date and city is displayed in a box.
+
+
+```{r echo = FALSE}
+            radioButtons(inputId = "ylabel", label = "Choose Param",
+                         choices = list("Max Temp" = 3, "Min Temp" = 5, "Avg Temp" = 4,
+                                        "Avg Humidity" = 6, "Avg Wind Speed" = 7),
+                         selected = 4)
+```
+
+
+### Choosing the City/Cities
+
+A Grouped Check button having 3 buttons corresponding to each of the city should be checked for the plot to be visible.
+
+If no cities are chosen, the plot will not be visible.
+
+The default choice is Bangalore.
+
+
+```{r echo = FALSE}
+            checkboxGroupInput(inputId = "city", label = "Choose Cities",
+                         choices = list("Bangalore" = 1, "Mumbai" = 2, "Chennai" = 3),
+                         selected = 1)
+```
+
+
+### The Plot
+
+The Plot is highly interactive. It is a scatter plot with both lines and points.
+
+Each City is differentiated by colour and the legends are present on the right side of the plot.
+
+Changing any selection on the input side will result in the corresponding change in plot, updated almost instantaneously on a fast machine with good internet speed.
+
+```{r echo = FALSE}
+df <- read.csv("May_Weather.csv")
+dfB <- subset(df, df$City == "Bangalore")
+dfM <- subset(df, df$City == "Mumbai")
+dfC <- subset(df, df$City == "Chennai")
+df <- cbind(dfB, dfM, dfC)
+
+y_label <- c('','','Max Temperature in Fahrenheit', 'Avg Temperature in Fahrenheit',
+             'Min Temperature in Fahrenheit', 'Avg Humidity in %', 'Avg Wind Speed in mph')
+
+
+renderPlotly({
+  
+            data <- subset(df, Date >= input$date[1] & Date <= input$date[2])
+            y_param <- as.numeric(input$ylabel)
+            city <- input$city
+
+            fig <- plot_ly(data, x = ~data$Date)
+            fig <- fig %>% layout(
+                xaxis = list(title = "Date"),
+                yaxis = list(title = y_label[y_param]))
+            
+            if("1" %in% city){          
+                fig <- fig %>% add_trace(y = ~data[[y_param]]
+                           , name = 'Bangalore', 
+                    type = 'scatter', mode = 'lines+markers',
+                    marker = list(size = data[[6]]/7), hoverinfo = 'text',
+                    
+                    text = ~paste(data[[1]],'on May', data[[2]], 
+                    '<br>Max Temp :', data[[3]],'F','<br>Min Temp :', data[[5]],
+                    'F','<br>Avg Temp :', data[[4]],'F', '<br>Humidity :',
+                    data[[6]],'%','<br>Wind Spd :', data[[7]],'mph')
+                    )
+            }
+
+            
+# Preparing for Mumbai
+
+            if("2" %in% city){ 
+            fig <- fig %>% add_trace(y = ~data[[y_param  + 7]], name = 'Mumbai', 
+                           mode = 'lines+markers',
+                           marker = list(size = data[[6 + 7]]/7), hoverinfo = 'text',
+            
+                           text = ~paste(data[[1 + 7]],'on May', data[[2 + 7]], 
+            '<br>Max Temp :', data[[3 + 7]],'F','<br>Min Temp :', data[[5 + 7]],
+            'F','<br>Avg Temp :', data[[4 + 7]],'F', '<br>Humidity :',
+            data[[6 + 7]],'%','<br>Wind Spd :', data[[7 + 7]],'mph')
+            )
+            }
+            
+# Preparing for Chennai
+            
+            if("3" %in% city){ 
+            fig <- fig %>% add_trace(y = ~data[[y_param  + 14]], name = 'Chennai', 
+                            mode = 'lines+markers',
+                            marker = list(size = data[[6 + 14]]/7), hoverinfo = 'text',
+                                     
+                            text = ~paste(data[[1 + 14]],'on May', data[[2 + 14]], 
+            '<br>Max Temp :', data[[3 + 14]],'F','<br>Min Temp :', data[[5 + 14]],
+            'F','<br>Avg Temp :', data[[4 + 14]],'F', '<br>Humidity :',
+            data[[6 + 14]],'%','<br>Wind Spd :', data[[7 + 14]],'mph')
+            )
+            }
+            if(!is.null(city))
+            fig
+            
+                        })
+```

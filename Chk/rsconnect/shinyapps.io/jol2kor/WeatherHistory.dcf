@@ -1,0 +1,13 @@
+name: WeatherHistory
+title: WeatherHistory
+username:
+account: jol2kor
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4234521
+bundleId: 4683756
+url: https://jol2kor.shinyapps.io/WeatherHistory/
+when: 1622984904.54897
+lastSyncTime: 1622984904.54897
+asMultiple: FALSE
+asStatic: FALSE
