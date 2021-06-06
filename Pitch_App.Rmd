@@ -15,6 +15,13 @@ The App displays the weather conditions that were prevailing in the 3 cities, Ba
 
 The parameters available are Max, Min and Average temperature, average Humidity and average Wind Speed which are displayed in the graph as per the users selections.
 
+A few samples of the data is listed below -
+```{r data, comment=""}
+df <- read.csv("May_Weather.csv")
+head(df)
+```
+
+
 ## User Friendly
 
 - Date Range modification through slide bar, no need of date entry through keyboard
